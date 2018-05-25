@@ -85,7 +85,8 @@ class 丢球(magic):
     def act(self):
         # p=unit.魔法球(裁人的圣剑)
         # p=unit.魔法球(射箭)
-        p=unit.魔法球(自己爆炸)
+        # p=unit.魔法球(自己爆炸)
+        p=unit.魔法球(冰盾)
         p.基础速度=self.owner.面向*20
         self.owner.召唤(p)
         

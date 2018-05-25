@@ -316,33 +316,38 @@ class GLWidget(QOpenGLWidget):
                 t=块.画顶()
                 a.append(numpy.array(t[1])+pos)
                 b.append(numpy.array(t[0]))
-                # 色=self.世界.亮度[x,y,z+1]
-                c.append(numpy.ones(12)*0.5)
+                色=self.世界.亮度.get((x,y,z+1),15)
+                c.append(numpy.ones(12)*(色+1)/16)
             if not (x,y,z-1) in self.世界.全块:
                 t=块.画底()
                 a.append(numpy.array(t[1])+pos)
                 b.append(numpy.array(t[0]))
-                c.append(numpy.ones(12)*0.5)
+                色=self.世界.亮度.get((x,y,z-1),15)
+                c.append(numpy.ones(12)*(色+1)/16)
             if not (x+1,y,z) in self.世界.全块:
                 t=块.画左()
                 a.append(numpy.array(t[1])+pos)
                 b.append(numpy.array(t[0]))
-                c.append(numpy.ones(12)*0.5)
+                色=self.世界.亮度.get((x+1,y,z),15)
+                c.append(numpy.ones(12)*(色+1)/16)
             if not (x-1,y,z) in self.世界.全块:
                 t=块.画右()
                 a.append(numpy.array(t[1])+pos)
                 b.append(numpy.array(t[0]))
-                c.append(numpy.ones(12)*0.5)
+                色=self.世界.亮度.get((x-1,y,z),15)
+                c.append(numpy.ones(12)*(色+1)/16)
             if not (x,y+1,z) in self.世界.全块:
                 t=块.画前()
                 a.append(numpy.array(t[1])+pos)
                 b.append(numpy.array(t[0]))
-                c.append(numpy.ones(12)*0.5)
+                色=self.世界.亮度.get((x,y+1,z),15)
+                c.append(numpy.ones(12)*(色+1)/16)
             if not (x,y-1,z) in self.世界.全块:
                 t=块.画后()
                 a.append(numpy.array(t[1])+pos)
                 b.append(numpy.array(t[0]))
-                c.append(numpy.ones(12)*0.5)
+                色=self.世界.亮度.get((x,y-1,z),15)
+                c.append(numpy.ones(12)*(色+1)/16)
 
         数据=块缓冲.数据字典[m]
         数据['顶点组']=numpy.float32(a).flatten()

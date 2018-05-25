@@ -16,12 +16,13 @@ import 地形
 class 世界():
     def __init__(self):
         self.全块={}
+        self.亮度={}
+        self.顶={}
         self.块索引={}
         self.记录=[]
         self.单位池=单位池()
         self.delay=[]
         self.已初始化区域=set()
-        # self.亮度={}
         self.地形生成器=地形.地形生成器(种子=233)
         if not env.客户端:
             try:
@@ -61,6 +62,9 @@ class 世界():
         
     def 放块(self,x,y,z,块,强制=False,初=False):
         self.去块(x,y,z,初=初)
+        # print('放',(x,y,z))
+        if self.顶.get((x,y),-16)<z:
+            self.顶[x,y]=z
         
         if not env.客户端 and not 初:
             self.记录.append(('放',x,y,z,块.id))
@@ -69,12 +73,45 @@ class 世界():
 
         self.全块[x,y,z]=块.id
 
-        m=x//16,y//16,z//16        
+        m=x//16,y//16,z//16
         索引=self.块索引.setdefault(m,[])
         索引.append((x,y,z))
 
+        self.亮度[x,y,z]=0
+        self.更新周边亮度(x,y,z)
+
         if not 初:
             self.绘图重置(x,y,z)
+
+    def 更新亮度(self,x,y,z):
+        if not -16<z<128: return
+        if (x,y,z) in self.全块: 
+            return
+
+        if self.顶.get((x,y),-16)<z:
+            t=15
+        else:
+            a=self.亮度.get((x,y,z+1), 15)
+            b=self.亮度.get((x,y,z-1), 15)
+            c=self.亮度.get((x,y+1,z), 15)
+            d=self.亮度.get((x,y-1,z), 15)
+            e=self.亮度.get((x+1,y,z), 15)
+            f=self.亮度.get((x-1,y,z), 15)
+            t=max(0,max(a,b,c,d,e,f)-1)
+        亮度=self.亮度.get((x,y,z), 15)
+        if 亮度!=t:
+            self.亮度[x,y,z]=t
+            self.更新周边亮度(x,y,z)
+            self.绘图重置(x,y,z)
+
+    def 更新周边亮度(self,x,y,z):
+        self.更新亮度(x,y,z+1)
+        self.更新亮度(x,y,z-1)
+        self.更新亮度(x,y+1,z)
+        self.更新亮度(x,y-1,z)
+        self.更新亮度(x+1,y,z)
+        self.更新亮度(x-1,y,z)
+
 
     def 去块(self,x,y,z,强制=False,初=False):
         if (x,y,z) not in self:
@@ -89,11 +126,22 @@ class 世界():
             for i in range(20):
                 particle.particle(self.全块[(x,y,z)] ,x+rd(0.0,1.0),y+rd(0.0,1.0),z+rd(0.0,1.0)
                     ,speed=0.3,t=rd(0.2,0.9),size=0.1,重力系数=0.1)
-                    
+        
         self.绘图重置(x,y,z)
         # print(x,y,z)
         self.全块.pop((x,y,z))
         self.块索引[x//16,y//16,z//16].remove((x,y,z))
+
+        if self.顶.get((x,y),-16)==z:
+            self.更新顶(x,y)
+        self.更新亮度(x,y,z)
+
+    def 更新顶(self,x,y):
+        顶=self.顶.setdefault((x,y),-16)
+        for i in range(顶,-16,-1):
+            if (x,y,i) in self.全块:
+                self.顶[x,y]=i
+                break
 
     def 绘图重置(self,x,y,z):
         for v in vec(x,y,z).临近:
