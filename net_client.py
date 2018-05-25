@@ -47,9 +47,8 @@ def recv():
                 env.主世界.单位池=value
             if key=='块':
                 t='块'
-                print()
-                print('数据起始:',value[0][0])
-                print('已有长度:',len(env.主世界.记录))
+                # print('数据起始:',value[0][0])
+                # print('已有长度:',len(env.主世界.记录))
                 if len(value)>80:
                     env.启用粒子=False
                 if value[0][0]==len(env.主世界.记录):
@@ -58,11 +57,11 @@ def recv():
                         if i[1][0]=='放':
                             i=i[1]
                             x,y,z,id=i[1],i[2],i[3],i[4]
-                            env.主世界.放块(x,y,z,block.m[id],True)
+                            env.主世界.放块(x,y,z,block.m[id],远程=True)
                         elif i[1][0]=='去':
                             i=i[1]
                             x,y,z=i[1],i[2],i[3]
-                            env.主世界.去块(x,y,z,True)
+                            env.主世界.去块(x,y,z,远程=True)
                 if len(value)>80:
                     env.启用粒子=True
                 无效=True

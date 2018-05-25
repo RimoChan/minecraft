@@ -16,8 +16,10 @@ env.主世界=world.世界()
 print('主循环启动了。')
 
 import net_server
-
+import atexit
 print('按ctrl-c来安全退出。')
+
+atexit.register(env.主世界.保存)
 
 try:
     运行时间=0
@@ -34,9 +36,8 @@ try:
         env.发送单位=env.主世界.单位池
 except Exception as e:
     env.主世界.保存()
-    print(e)
-    0/0
-    print('好好保存了。')
+
+
         
      
     

@@ -4,6 +4,7 @@ import copy
 import pickle
 import zlib
 import threading
+import os
 
 from vec import *
 import env
@@ -29,7 +30,8 @@ class 世界():
         if not env.客户端:
             try:
                 self.读取()
-            except:
+            except Exception as e:
+                raise(e)
                 print('读档失败……')
 
     def __contains__(self,块座标):
@@ -45,24 +47,27 @@ class 世界():
             t.start()
         
     def 保存(self):
-        data=[]
-        for pos,块 in self.全块.items():
-            x,y,z=pos
-            data.append((x,y,z,块.id))
-        data=zlib.compress(pickle.dumps(data))
-        f=open('save_data/world.dat','wb')
-        f.write(data)
-        f.close()
+        data=zlib.compress(pickle.dumps(self.记录))
+        try:
+            os.mkdir('save_data')
+        except:
+            None
+        with open('save_data/world.dat','wb') as f:
+            f.write(data)
     def 读取(self):
-        f=open('save_data/world.dat','rb')
-        data=f.read()
-        f.close()
-        data=pickle.loads(zlib.decompress(data))
-        for i in data:
-            x,y,z,id=i[0],i[1],i[2],i[3]
-            self.放块(x,y,z,block.m[id])
-        
-    def 放块(self,x,y,z,块,强制=False,初=False):
+        with open('save_data/world.dat','rb') as f:
+            data=f.read()
+        self.记录=pickle.loads(zlib.decompress(data))
+
+        for i in self.记录:
+            if i[0]=='放':
+                x,y,z,id=i[1],i[2],i[3],i[4]
+                self.放块(x,y,z,block.m[id],初=True)
+            elif i[0]=='去':
+                x,y,z=i[1],i[2],i[3]
+                self.去块(x,y,z,初=True)
+
+    def 放块(self,x,y,z,块,远程=False,初=False):
         self.去块(x,y,z,初=初)
         # print('放',(x,y,z))
         if self.顶.get((x,y),下界-1)<z:
@@ -70,7 +75,7 @@ class 世界():
         
         if not env.客户端 and not 初:
             self.记录.append(('放',x,y,z,块.id))
-        if env.客户端 and not 强制 and not 初:
+        if env.客户端 and not 初 and not 远程:
             return
 
         self.全块[x,y,z]=块.id
@@ -92,6 +97,30 @@ class 世界():
 
         if not 初:
             self.绘图重置(x,y,z)
+
+    def 去块(self,x,y,z,远程=False,初=False):
+        if (x,y,z) not in self:
+            return
+        
+        if not env.客户端 and not 初:
+            self.记录.append(('去',x,y,z))
+            
+        if env.客户端 and not 远程 and not 初:
+            return
+            
+        if env.客户端 and env.启用粒子 and not 初:
+            for i in range(20):
+                particle.particle(self.全块[(x,y,z)] ,x+rd(0.0,1.0),y+rd(0.0,1.0),z+rd(0.0,1.0)
+                    ,speed=0.3,t=rd(0.2,0.9),size=0.1,重力系数=0.1)
+        
+        self.绘图重置(x,y,z)
+        # print(x,y,z)
+        self.全块.pop((x,y,z))
+        self.块索引[x//16,y//16,z//16].remove((x,y,z))
+
+        if self.顶.get((x,y),下界-1)==z:
+            self.更新顶(x,y)
+        self.更新亮度(x,y,z)
 
     def 更新亮度(self,x,y,z):
         if (x,y,z) in self.全块: 
@@ -125,28 +154,6 @@ class 世界():
         self.更新亮度(x-1,y,z)
 
 
-    def 去块(self,x,y,z,强制=False,初=False):
-        if (x,y,z) not in self:
-            return
-        
-        if not env.客户端 and not 初:
-            self.记录.append(('去',x,y,z))
-            
-        if env.客户端 and not 强制 and not 初:
-            return
-        if env.客户端 and env.启用粒子 and not 初:
-            for i in range(20):
-                particle.particle(self.全块[(x,y,z)] ,x+rd(0.0,1.0),y+rd(0.0,1.0),z+rd(0.0,1.0)
-                    ,speed=0.3,t=rd(0.2,0.9),size=0.1,重力系数=0.1)
-        
-        self.绘图重置(x,y,z)
-        # print(x,y,z)
-        self.全块.pop((x,y,z))
-        self.块索引[x//16,y//16,z//16].remove((x,y,z))
-
-        if self.顶.get((x,y),下界-1)==z:
-            self.更新顶(x,y)
-        self.更新亮度(x,y,z)
 
     def 更新顶(self,x,y):
         顶=self.顶.get((x,y),下界-1)

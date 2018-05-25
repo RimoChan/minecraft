@@ -117,7 +117,7 @@ class 放块(magic):
         v2=self.owner.面向
         for _ in range(600):
             if v1.intize in env.主世界: 
-                env.主世界.放块(*v0.intize,block.红石)
+                env.主世界.放块(*v0.intize,block.橡木板)
                 return
             v0=v1
             v1+=v2*0.01
