@@ -12,6 +12,8 @@ import 块缓冲
 if env.客户端:
     import particle
 
+下界=-16
+
 import 地形
 class 世界():
     def __init__(self):
@@ -63,7 +65,7 @@ class 世界():
     def 放块(self,x,y,z,块,强制=False,初=False):
         self.去块(x,y,z,初=初)
         # print('放',(x,y,z))
-        if self.顶.get((x,y),-16)<z:
+        if self.顶.get((x,y),下界-1)<z:
             self.顶[x,y]=z
         
         if not env.客户端 and not 初:
@@ -78,26 +80,36 @@ class 世界():
         索引.append((x,y,z))
 
         self.亮度[x,y,z]=0
-        self.更新周边亮度(x,y,z)
+
+        # 优化，因为天光块不受降低影响，亮度为0的块不可能此时被更新
+        if (0<self.亮度.get((x,y,z-1), 15) or
+            0<self.亮度.get((x,y,z+1), 15)<15 or
+            0<self.亮度.get((x,y+1,z), 15)<15 or
+            0<self.亮度.get((x,y-1,z), 15)<15 or
+            0<self.亮度.get((x+1,y,z), 15)<15 or
+            0<self.亮度.get((x-1,y,z), 15)<15):
+            self.更新周边亮度(x,y,z)
 
         if not 初:
             self.绘图重置(x,y,z)
 
     def 更新亮度(self,x,y,z):
-        if not -16<z<128: return
         if (x,y,z) in self.全块: 
             return
+        if not 下界<=z<=128: return
 
-        if self.顶.get((x,y),-16)<z:
+        if self.顶.get((x,y),下界-1)<z:
             t=15
         else:
-            a=self.亮度.get((x,y,z+1), 15)
-            b=self.亮度.get((x,y,z-1), 15)
-            c=self.亮度.get((x,y+1,z), 15)
-            d=self.亮度.get((x,y-1,z), 15)
-            e=self.亮度.get((x+1,y,z), 15)
-            f=self.亮度.get((x-1,y,z), 15)
-            t=max(0,max(a,b,c,d,e,f)-1)
+            t=max(
+                1,
+                self.亮度.get((x,y,z+1), 15),
+                self.亮度.get((x,y,z-1), 15),
+                self.亮度.get((x,y+1,z), 15),
+                self.亮度.get((x,y-1,z), 15),
+                self.亮度.get((x+1,y,z), 15),
+                self.亮度.get((x-1,y,z), 15),
+            )-1
         亮度=self.亮度.get((x,y,z), 15)
         if 亮度!=t:
             self.亮度[x,y,z]=t
@@ -132,18 +144,19 @@ class 世界():
         self.全块.pop((x,y,z))
         self.块索引[x//16,y//16,z//16].remove((x,y,z))
 
-        if self.顶.get((x,y),-16)==z:
+        if self.顶.get((x,y),下界-1)==z:
             self.更新顶(x,y)
         self.更新亮度(x,y,z)
 
     def 更新顶(self,x,y):
-        顶=self.顶.setdefault((x,y),-16)
-        for i in range(顶,-16,-1):
+        顶=self.顶.get((x,y),下界-1)
+        for i in range(顶,下界,-1):
             if (x,y,i) in self.全块:
                 self.顶[x,y]=i
                 break
 
     def 绘图重置(self,x,y,z):
+        if not env.客户端: return
         for v in vec(x,y,z).临近:
             m=v[0]//16,v[1]//16,v[2]//16
             if m in 块缓冲.数据字典:
@@ -178,9 +191,20 @@ class 单位池(dict):
         self.lazy.append(u)
         self.n+=1
         
-if __name__=='__main__': 
+def test():
     a=世界()
     print((0,0) in a)
     print((-1,-1) in a)
     print((-1,0) in a)
     print((0,-1) in a)
+
+if __name__=='__main__': 
+
+    import cProfile
+ 
+    cProfile.run("test()", "result")
+     
+    import pstats
+    p = pstats.Stats("result")
+ 
+    p.strip_dirs().sort_stats("tottime").print_stats()
