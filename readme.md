@@ -24,7 +24,7 @@ FPS(First-Person Shejing)遊戲，翻譯過來大概就是第一人稱射精遊�
 
 ## 依賴
 python3
-pip install ptqt5 pyopengl pillow pyglet pywavefront python-opencv
+pip install pyqt5 pyopengl pillow pyglet pywavefront opencv-python
 
 ## 玩耍
 
