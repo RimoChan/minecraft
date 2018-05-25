@@ -101,7 +101,6 @@ class 主窗口(QWidget):
             net_client.udp_send(('法术',1,'开始施法'))
 
     def mouseReleaseEvent(self,event):
-        # 单击捕捉不到？？？
         if 配置.surface模式:
             return
 
