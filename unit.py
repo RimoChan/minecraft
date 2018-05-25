@@ -1,6 +1,7 @@
 import math
 from math import sin,cos
 import copy
+import struct
 
 import numpy as np
 import pywavefront
@@ -13,6 +14,7 @@ import particle
 import 情形
 
 import time
+import 自动
 
 from pythongl import *
 
@@ -37,6 +39,9 @@ class 单位():
     模型=None
     
     def __init__(self):
+        self.id=-1
+        self.生命=100
+        self.魔力=100
         self.基础速度=vec(0,0,0)
         
         self.位置=vec(0,0,0)
@@ -44,8 +49,28 @@ class 单位():
         
         self.法术=h_list(self)
         self.效果=h_list(self)
-
         
+    def __getstate__(self):
+        return {0:struct.pack('i10f?',
+            self.id,
+            self.生命,self.魔力,
+            self.基础速度.x,self.基础速度.y,self.基础速度.z,
+            self.位置.x,self.位置.y,self.位置.z,
+            self.面角[0],self.面角[1],
+            self.生
+            )}
+    def __setstate__(self,state):
+        (self.id,
+        self.生命,self.魔力,   
+        速度x,速度y,速度z,
+        位置x,位置y,位置z,
+        面角0,面角1,
+        self.生) = struct.unpack('i10f?',state[0])
+    
+        self.基础速度=vec(速度x,速度y,速度z)
+        self.位置=vec(位置x,位置y,位置z)
+        self.面角=[面角0,面角1]
+    
     def tp(self,t):
         self.物理(t)
         
@@ -82,11 +107,6 @@ class 单位():
             self.位置.x,self.位置.y=x,y
             self.基础速度.x=0
             self.基础速度.y=0
-            
-            
-    def 跳(self):
-        if self.着地:
-            self.基础速度.z+=math.sqrt(2*env.G*self.重力系数*self.跳跃高度)
 
     @property
     def 中心(self):
@@ -119,10 +139,16 @@ class 单位():
     @property
     def 着地(self):
         return any((i.intize in env.主世界 for i in self.位置.角枚举(self.形状,True)))
+        
     @property
     def 碰撞(self):
         return any((i.intize in env.主世界 for i in 
                 (self.位置+vec(0,0,0.002)).角枚举(self.形状-vec(0,0,0.004)) 
+                ))
+    @property
+    def 靠墙(self):
+        return any((i.intize in env.主世界 for i in
+                (self.位置+vec(-0.01,-0.01,0.002)).角枚举(self.形状+vec(+0.02,+0.02,-0.004)) 
                 ))
                 
     @property
@@ -160,12 +186,20 @@ class 单位():
             u.位置=pos
         env.主世界.单位池.加(u)
         
-class 虚无():
+class 虚无:
     def 物理(self,t):     #屏蔽了碰撞等处理
         self.基础速度.z-=env.G*self.重力系数*t
         if self.空气阻力系数:
             self.基础速度*=(1-self.空气阻力系数)**t
         self.位置+=self.速度*t
+
+class 自动的:
+    def __init__(self,*l,**d):
+        super().__init__(*l,**d)
+        self.自动器=self.自动器(self)
+    def tp(self,t):
+        self.自动器.go(t)
+        super().tp(t)
 
 class 炮(虚无,单位):
     重力系数=0.05
@@ -292,7 +326,17 @@ class 生物(单位):
     def __init__(self):
         super().__init__()
         self.行走方向=0
+
+    def 跳(self):
+        if self.着地:
+            self.基础速度.z+=math.sqrt(2*env.G*self.重力系数*self.跳跃高度)
             
+class 羊(自动的,生物):
+    形状=vec(0.4,0.4,0.4)
+    自动器=自动.自动走
+    腿脚速度=1
+    跳跃高度=1.2
+
 class 人(生物):
     视高=1.5
     跳跃高度=1.25
@@ -308,7 +352,7 @@ class 人(生物):
         self.法术.append(magic.丢球())  #滚轮
         
         self.法术.append(magic.弹幕())  #Q
-        self.法术.append(magic.丢球())   #E
+        self.法术.append(magic.召唤羊())   #E
         self.法术.append(magic.狂热())   #SHIFT
 
     def draw(self):
@@ -353,3 +397,11 @@ class 人(生物):
         
 class suin(人):
     照片='48035702'
+
+
+if __name__=='__main__':
+    import pickle
+    me=人()
+    del me.法术
+    del me.效果
+    print(len(pickle.dumps(me)))

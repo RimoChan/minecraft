@@ -44,7 +44,7 @@ def recv():
             if key=='id':
                 env.my_id=value
             if key=='单位':
-                env.主世界.单位池=value.展开()
+                env.主世界.单位池=value
             if key=='块':
                 t='块'
                 print()

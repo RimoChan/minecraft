@@ -199,8 +199,8 @@ class GLWidget(QOpenGLWidget):
         self.逻辑帧率=0
         
     def initializeGL(self):
-        # glClearColor(0.4,0.6,1,0)
-        glClearColor(0.7,0.1,0.1,0)
+        glClearColor(0.4,0.6,1,0)
+        # glClearColor(0.7,0.1,0.1,0)
         # glClearColor(0,0,0,0)
         glClearDepth(1.0)
         glEnable(GL_CULL_FACE)

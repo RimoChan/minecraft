@@ -177,24 +177,6 @@ class 单位池(dict):
         u.id=self.n
         self.lazy.append(u)
         self.n+=1
-    def 缩减(self):
-        池=copy.copy(self)
-        for i in 池:
-            池[i]=copy.copy(池[i])
-            del 池[i].法术
-            del 池[i].效果
-            池[i].位置=(池[i].位置*1000).intize
-            池[i].基础速度=(池[i].基础速度*1000).intize
-        return 池
-    def 展开(self):
-        池=copy.copy(self)
-        for i in 池:
-            池[i]=copy.copy(池[i])
-            池[i].位置=vec(*池[i].位置)*0.001
-            池[i].法术=()
-            池[i].效果=()
-            池[i].基础速度=vec(*池[i].基础速度)*0.001
-        return 池
         
 if __name__=='__main__': 
     a=世界()

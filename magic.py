@@ -90,6 +90,13 @@ class 丢球(magic):
         p.基础速度=self.owner.面向*20
         self.owner.召唤(p)
         
+class 召唤羊(magic):
+    cool_down=0.1
+    def act(self):
+        p=unit.羊()
+        self.owner.召唤(p)
+
+        
 class 冰盾(magic):
     cool_down=10
     def act(self):

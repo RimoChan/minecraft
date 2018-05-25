@@ -31,7 +31,7 @@ try:
             time_passed=0.02 #保证刷新均匀
         运行时间+=time_passed
         env.主世界.tp(time_passed)
-        env.发送单位=env.主世界.单位池.缩减()
+        env.发送单位=env.主世界.单位池
 except Exception as e:
     env.主世界.保存()
     print(e)
