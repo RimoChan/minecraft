@@ -37,6 +37,8 @@ from PyQt5.QtWidgets import *
 
 from 配置 import 配置
 
+天色=0.4,0.6,1,1
+
 class 主窗口(QWidget):
 
     def __init__(self):
@@ -198,22 +200,30 @@ class GLWidget(QOpenGLWidget):
         self.逻辑帧率=0
         
     def initializeGL(self):
-        glClearColor(0.4,0.6,1,0)
-        # glClearColor(0.7,0.1,0.1,0)
-        # glClearColor(0,0,0,0)
+        
+        glutInit()
+        glClearColor(0,0,0,0)
         glClearDepth(1.0)
         glEnable(GL_CULL_FACE)
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_TEXTURE_2D)
         glPolygonMode(GL_FRONT, GL_FILL)
 
+        glFogi(GL_FOG_MODE, GL_LINEAR)
+        glFogfv(GL_FOG_COLOR, (GLfloat * 4)(1,1,1,1))
+        glHint(GL_FOG_HINT, GL_NICEST)
+        glFogf(GL_FOG_START, (配置.视距)*4)
+        glFogf(GL_FOG_END, (配置.视距)*16)
+        glEnable(GL_FOG)
+
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
         import texture
 
         glGenBuffers(3000)
 
     def paintGL(self):
-        # print(self.我.眼睛)
-
 
         if self.接管鼠标 and not 配置.surface模式:
             self.镜头修正()
@@ -274,15 +284,17 @@ class GLWidget(QOpenGLWidget):
         return ans
         
     def 画面刷新(self):
-
         #3D
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_TEXTURE_2D)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) 
         
+        glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        gluPerspective(配置.视角大小, 配置.屏幕大小[0]/配置.屏幕大小[1], 0.1, (配置.视距)*16)
-        
+        gluPerspective(配置.视角大小, 配置.屏幕大小[0]/配置.屏幕大小[1], 0.01, (配置.视距+2)*16)
+
+        glMatrixMode(GL_MODELVIEW)
+        glLoadIdentity()
         gluLookAt(*self.我.眼睛, *(self.我.眼睛+self.我.面向), 0,0,1)
         
         #预加载
@@ -291,15 +303,16 @@ class GLWidget(QOpenGLWidget):
         
         self.绘图()
 
-        #2D
-        glDisable(GL_TEXTURE_2D)
+        glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
-        
-        with lines(color=(1,1,0.5),width=2):
-            glVertex2f(配置.准星大小*配置.屏幕大小[1]/配置.屏幕大小[0],0)
-            glVertex2f(-配置.准星大小*配置.屏幕大小[1]/配置.屏幕大小[0],0)
-            glVertex2f(0,配置.准星大小)
-            glVertex2f(0,-配置.准星大小)
+        glDisable(GL_DEPTH_TEST)
+        glDisable(GL_TEXTURE_2D)
+        glColor4f(1,1,0.6,0.7)
+        with lines(width=3):
+            glVertex3f(配置.准星大小,0,-1)
+            glVertex3f(-配置.准星大小,0,-1)
+            glVertex3f(0,配置.准星大小,-1)
+            glVertex3f(0,-配置.准星大小,-1)
     
     def 缓冲区域(self,m):
         块缓冲.添加(m)
@@ -394,12 +407,16 @@ class GLWidget(QOpenGLWidget):
 
     def 绘图(self):
         # 画天空盒子
-        # x,y,z=self.我.眼睛
-        # x-=50;y-=50;z-=50
-        # glTranslatef(x,y,z)
-        # gl_list.画gl_list('天空盒子')
-        # glTranslatef(-x,-y,-z)
-        
+        x,y,z=self.我.眼睛
+
+        with temp_translate(x,y,z):
+            with temp_scale(1,1,0.3):
+                glBindTexture(GL_TEXTURE_2D, 0)
+                glDisable(GL_CULL_FACE)
+                glColor(*天色)
+                glutSolidSphere((配置.视距+1)*16,60,60)
+                glEnable(GL_CULL_FACE)
+
         # 画地形
         glEnableClientState(GL_VERTEX_ARRAY)
         glEnableClientState(GL_TEXTURE_COORD_ARRAY)
@@ -437,7 +454,7 @@ class GLWidget(QOpenGLWidget):
         t=self.我.所面向的块      
         if t:
             x,y,z=t
-            glColor(0.8,0.8,0.8)
+            glColor4f(1,1,1,0.7)
             d=0.005
             line_box(x-d,y-d,z-d,1+2*d,1+2*d,1+2*d)
             
