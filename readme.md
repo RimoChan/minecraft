@@ -23,16 +23,18 @@ FPS(First-Person Shejing)遊戲，翻譯過來大概就是第一人稱射精遊�
 有一種不明真相的同學玩了兩個小時以後一定會把我打一頓的錯覺……   
 
 ## 依賴
+
 python3
+
 pip install pyqt5 pyopengl pillow pyglet pywavefront opencv-python
 
 ## 玩耍
 
-python3 服务主机.py 來啓動伺服器  
+python3 服务主机.py 來啓動伺服器   
 python3 客户端qt.py 來啓動用戶端  
 
-使用 *滑鼠* 來控制方向
-使用 *WASD* 來行走
-使用 *空白鍵* 來跳躍
-使用 *左鍵和右鍵* 來使破壞和放置方塊
-使用 *QE和Shift* 來使用特殊技能
+使用 *滑鼠* 來控制方向   
+使用 *WASD* 來行走   
+使用 *空白鍵* 來跳躍   
+使用 *左鍵和右鍵* 來使破壞和放置方塊   
+使用 *QE和Shift* 來使用特殊技能   
