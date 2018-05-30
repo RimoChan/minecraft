@@ -4,6 +4,7 @@ import random
 import math
 import sys
 import copy
+import ctypes
 
 import numpy 
 
@@ -21,6 +22,7 @@ import clock
 
 import env
 env.客户端=True
+
 import world
 env.主世界=world.世界()
 
@@ -212,7 +214,7 @@ class GLWidget(QOpenGLWidget):
         glFogi(GL_FOG_MODE, GL_LINEAR)
         glFogfv(GL_FOG_COLOR, (GLfloat * 4)(1,1,1,1))
         glHint(GL_FOG_HINT, GL_NICEST)
-        glFogf(GL_FOG_START, (配置.视距)*4)
+        glFogf(GL_FOG_START, (配置.视距)*6)
         glFogf(GL_FOG_END, (配置.视距)*16)
         glEnable(GL_FOG)
 
@@ -221,7 +223,7 @@ class GLWidget(QOpenGLWidget):
 
         import texture
 
-        glGenBuffers(3000)
+        glGenBuffers(10000)
 
     def paintGL(self):
 
@@ -298,8 +300,9 @@ class GLWidget(QOpenGLWidget):
         gluLookAt(*self.我.眼睛, *(self.我.眼睛+self.我.面向), 0,0,1)
         
         #预加载
-        t=tuple(self.我.眼睛+ran_vec()*配置.预加载距离*random.random())
-        env.主世界.预生成地形((int(t[0]),int(t[1])))
+        for _ in range(8):
+            t=tuple(self.我.眼睛+ran_vec()*配置.预加载距离*random.random())
+            env.主世界.预生成地形((int(t[0]),int(t[1])))
         
         self.绘图()
 
@@ -316,94 +319,55 @@ class GLWidget(QOpenGLWidget):
     
     def 缓冲区域(self,m):
         块缓冲.添加(m)
-        a=[]
-        b=[]
-        c=[]
-        for i in self.世界.块索引[m]:
-            块id=self.世界.全块[i]
-            块=block.m[块id]
-            x,y,z=i
-            pos=numpy.array([x,y,z, x,y,z, x,y,z, x,y,z])
-            if not (x,y,z+1) in self.世界.全块:
-                t=块.画顶()
-                a.append(numpy.array(t[1])+pos)
-                b.append(numpy.array(t[0]))
-                色=self.世界.亮度.get((x,y,z+1),15)
-                c.append(numpy.ones(12)*(色+1)/16)
-            if not (x,y,z-1) in self.世界.全块:
-                t=块.画底()
-                a.append(numpy.array(t[1])+pos)
-                b.append(numpy.array(t[0]))
-                色=self.世界.亮度.get((x,y,z-1),15)
-                c.append(numpy.ones(12)*(色+1)/16)
-            if not (x+1,y,z) in self.世界.全块:
-                t=块.画左()
-                a.append(numpy.array(t[1])+pos)
-                b.append(numpy.array(t[0]))
-                色=self.世界.亮度.get((x+1,y,z),15)
-                c.append(numpy.ones(12)*(色+1)/16)
-            if not (x-1,y,z) in self.世界.全块:
-                t=块.画右()
-                a.append(numpy.array(t[1])+pos)
-                b.append(numpy.array(t[0]))
-                色=self.世界.亮度.get((x-1,y,z),15)
-                c.append(numpy.ones(12)*(色+1)/16)
-            if not (x,y+1,z) in self.世界.全块:
-                t=块.画前()
-                a.append(numpy.array(t[1])+pos)
-                b.append(numpy.array(t[0]))
-                色=self.世界.亮度.get((x,y+1,z),15)
-                c.append(numpy.ones(12)*(色+1)/16)
-            if not (x,y-1,z) in self.世界.全块:
-                t=块.画后()
-                a.append(numpy.array(t[1])+pos)
-                b.append(numpy.array(t[0]))
-                色=self.世界.亮度.get((x,y-1,z),15)
-                c.append(numpy.ones(12)*(色+1)/16)
-
+            
         数据=块缓冲.数据字典[m]
-        数据['顶点组']=numpy.float32(a).flatten()
-        数据['纹理组']=numpy.float32(b).flatten()
-        数据['颜色组']=numpy.float32(c).flatten()
-        顶点数据数=数据['顶点组'].shape[0]
+        x,y,z=m
+        顶点数据数 = world.c世界.export_vertex(x,y,z,
+            数据['顶点组'].ctypes.data,
+            数据['颜色组'].ctypes.data, 
+            数据['纹理组'].ctypes.data)
+        纹理数据数=顶点数据数//3*2
+        数据['顶点组']=数据['顶点组'][:顶点数据数]
+        数据['颜色组']=数据['颜色组'][:顶点数据数]
+        数据['纹理组']=数据['纹理组'][:纹理数据数]
         顶点数=顶点数据数//3
-        纹理数据数=数据['纹理组'].shape[0]
+
+
+        #float因此×4
         glBindBuffer(GL_ARRAY_BUFFER, 数据['号']*3-2)
         glBufferData(GL_ARRAY_BUFFER, 顶点数据数*4,  数据['顶点组'], GL_STATIC_DRAW)
+
         glBindBuffer(GL_ARRAY_BUFFER, 数据['号']*3-1)
         glBufferData(GL_ARRAY_BUFFER, 纹理数据数*4,  数据['纹理组'], GL_STATIC_DRAW)
+
         glBindBuffer(GL_ARRAY_BUFFER, 数据['号']*3)
         glBufferData(GL_ARRAY_BUFFER, 顶点数据数*4,  数据['颜色组'], GL_STATIC_DRAW)
 
     def 绘制区域(self,m):
-        # 减支
-        # 其实反而会变慢23333
-        # v=vec(m[0]*16,m[1]*16,m[2]*16)
-        # 目至各顶点=(i-self.我.眼睛 for i in v.角枚举(vec(16,16,16)))
-        # if not any(i.同侧(self.我.面向) for i in 目至各顶点):
-        #     return
+        if not env.主世界.是最新(m):
+            self.缓冲区域(m)
 
         if m not in 块缓冲.数据字典:
-            if random.random()>0.03:    # 首次加载分步缓冲，其实应该改线程的2333
-                return
-            self.缓冲区域(m)
-        elif not 块缓冲.数据字典[m]['可用']:
-            self.缓冲区域(m)
+            return
 
+        数据 = 块缓冲.数据字典[m]
 
-        数据=块缓冲.数据字典[m]
         数据数=数据['顶点组'].shape[0]
+        if 数据数==0:
+            return
+
         顶点数=数据数//3
-        
-        glBindBuffer(GL_ARRAY_BUFFER, 数据['号']*3-2);
-        glVertexPointer(3, GL_FLOAT, 0, None);
-        glBindBuffer(GL_ARRAY_BUFFER, 数据['号']*3-1);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 数据['号']*3-2)
+        glVertexPointer(3, GL_FLOAT, 0, None)
+
+        glBindBuffer(GL_ARRAY_BUFFER, 数据['号']*3-1)
         glTexCoordPointer(2, GL_FLOAT, 0, None)
-        glBindBuffer(GL_ARRAY_BUFFER, 数据['号']*3);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 数据['号']*3)
         glColorPointer(3, GL_FLOAT, 0, None)
 
-        glDrawArrays(GL_QUADS, 0, 顶点数);
-        
+        glDrawArrays(GL_QUADS, 0, 顶点数)
 
     def 绘图(self):
         # 画天空盒子
@@ -427,8 +391,6 @@ class GLWidget(QOpenGLWidget):
             for dy in range(-配置.视距,配置.视距+1):
                 for dz in range(-配置.视距,配置.视距+1):
                     m=my_x//16+dx, my_y//16+dy, my_z//16+dz
-                    if m not in self.世界.块索引: 
-                        continue
                     self.绘制区域(m)
         glBindBuffer(GL_ARRAY_BUFFER, 0);
             
@@ -452,6 +414,7 @@ class GLWidget(QOpenGLWidget):
                 i.draw()
 
         t=self.我.所面向的块      
+        # print(t)
         if t:
             x,y,z=t
             glColor4f(1,1,1,0.7)

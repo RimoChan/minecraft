@@ -7,7 +7,7 @@ class 块():
     id=1
     坚固=10
     @classmethod
-    def __init__(cls):
+    def init(cls):
         起始位置=(cls.id-2)*16
         cls.顶,cls.前,cls.后,cls.左,cls.右,cls.底=[(i*16,起始位置) for i in range(6)]
             

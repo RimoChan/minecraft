@@ -64,7 +64,7 @@ class 地形生成器:
             return True
         self.锁=True
         assert (块x,块y) not in 世界.已初始化区域
-
+        print('初始化:',块x,块y,'……')
         c=clock.clock()
         c.tick()
     
@@ -74,7 +74,7 @@ class 地形生成器:
         a=self.生成矩阵(块x,块y)
         for 相对x in range(0,self.块边长):
             for 相对y in range(0,self.块边长):
-                z=a[相对x,相对y]
+                z=int(a[相对x,相对y])
                 x=相对x+self.块边长*块x
                 y=相对y+self.块边长*块y
                 for zt in range(下界,z-3):
@@ -82,14 +82,14 @@ class 地形生成器:
                 for zt in range(z-3,z):
                     世界.放块(x,y,zt,block.土,初=True)
                 世界.放块(x,y,z,block.草,初=True)
-    
+        
         R=random.Random(self.适应种子(块x,块y))
         for _ in range(15):
             相对位置=R.randint(4,self.块边长-5) , R.randint(4,self.块边长-5)
             位置=相对位置[0]+self.块边长*块x, 相对位置[1]+self.块边长*块y
-            self.放树(世界,*位置,a[相对位置])
+            self.放树(世界,*位置,int(a[相对位置]))
         
-        print('初始化:',块x,块y,'用时%.3fs。'%c.tick())
+        print('用时%.3fs。'%c.tick())
         self.锁=False
 
         return False
