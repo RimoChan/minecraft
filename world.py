@@ -31,7 +31,6 @@ class 世界():
             try:
                 self.读取()
             except Exception as e:
-                raise(e)
                 print('读档失败……')
 
     def __contains__(self,块座标):
