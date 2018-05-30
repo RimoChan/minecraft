@@ -6,20 +6,10 @@ m=dict()
 class 块():
     id=1
     坚固=10
-    贴图数=6
     @classmethod
-    def init(cls):
+    def __init__(cls):
         起始位置=(cls.id-2)*16
-        if cls.贴图数==6:
-            cls.顶,cls.底,cls.前,cls.后,cls.左,cls.右=[(i*16,起始位置) for i in range(6)]
-        elif cls.贴图数==3:
-            cls.顶=(0,起始位置)
-            cls.底=(32,起始位置)
-            cls.前,cls.后,cls.左,cls.右=[(16,起始位置)]*4
-        elif cls.贴图数==1:
-            cls.顶,cls.前,cls.后,cls.左,cls.右,cls.底=[(0,起始位置)]*6
-        else:
-            raise Exception('贴图数量不对')
+        cls.顶,cls.前,cls.后,cls.左,cls.右,cls.底=[(i*16,起始位置) for i in range(6)]
             
     @classmethod
     def Tex(cls,x,y,面):
@@ -91,73 +81,52 @@ class 块():
             )
     
 class 沙(块):
-    贴图数=1
     id=2
     
 class 土(块):
-    贴图数=1
     id=3
     
 class 草(块):
-    贴图数=3
     id=4
     
 class 砖(块):
-    贴图数=1
-    texture='brick'
     id=5
     
 class 橡木板(块):
-    贴图数=1
-    texture='oak'
     id=6
     
 class TNT(块):
-    贴图数=3
-    texture='tnt_up','tnt_side','tnt_dn'
     id=7
     
 class 钻石(块):
-    贴图数=1
-    texture='diamond_block'
     id=8
 
 class 石(块):
-    贴图数=1
-    texture='stone'
     id=9
 
 class 树干(块):
-    贴图数=3
-    texture='log_oak_top','log_oak','log_oak_top'
     id=10
 
 class 叶(块):
-    贴图数=1
-    texture='leaves_oak'
     id=11
 
 class 石台阶(块):
-    贴图数=3
-    texture='leaves_oak'
     id=12
 
 class 石砖(块): 
-    贴图数=1
     id=13
 
 class 雪块(块): 
-    贴图数=1
     id=14
 
 class 红石(块): 
-    贴图数=1
     id=15
 
 class 沙砾(块): 
-    贴图数=1
-    id=15
+    id=16
 
+class 金块(块):
+    id=17
 
 for i in 块,沙,土,草,砖,橡木板,TNT,钻石,石,树干,叶,石台阶,石砖,雪块,红石,沙砾:
     m[i.id]=i
