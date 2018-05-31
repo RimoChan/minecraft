@@ -152,11 +152,9 @@ class 去块(持续法术):
 class 狂热(持续法术): 
     cool_down=0
     def 起动效果(self):
-        print(self.owner.腿脚速度)
         self.owner.腿脚速度*=2
 
     def 停止效果(self):
-        print(self.owner.腿脚速度)
         self.owner.腿脚速度/=2
 
 class 持续射箭(持续法术):
