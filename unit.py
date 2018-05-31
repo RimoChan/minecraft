@@ -5,6 +5,7 @@ import struct
 
 import numpy as np
 import pywavefront
+import pywavefront.visualization
 
 from vec import *
 import env
