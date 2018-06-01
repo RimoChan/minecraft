@@ -10,13 +10,16 @@ import clock
 import env
 
 from tool import *
-clock1=clock.clock()
-clock2=clock.clock()
+
+收包钟=clock.clock()
+收包间隔=0
+udp钟=clock.clock()
 
 address=('0.0.0.0',23333)
 address2=('0.0.0.0',23334)
 
 udp池=dict()
+包计数=0
 
 def serv_all_send(self,data,addr):
     b_data=pickle.dumps(data)
@@ -34,7 +37,7 @@ udp_socket2.bind(address2)
 def udp处理():
     while True:
         mir=copy.copy(udp池)
-        t=clock2.tick()
+        t=udp钟.tick()
         for addr in mir:
             u=mir[addr]
             udp_socket2.serv_all_send({'id':u['id'],'单位':env.发送单位},
@@ -53,7 +56,14 @@ def udp处理():
 def server():
     def udp_listen(udp_socket):
         while True:
-            data, addr = udp_socket.recvfrom(4000)
+            data, addr = udp_socket.recvfrom(2000)
+      
+            a=收包钟.tick()+0.0001
+            global 收包间隔
+            收包间隔=(收包间隔*30+a)/31
+            if random.random()<0.001:
+                print('收包帧率:',1/收包间隔)
+            
             if addr not in udp池:
                 print('UDP从',addr,'连进来了。')
                 他=unit.人()
@@ -100,13 +110,13 @@ def server():
             else:
                 print(data)
                 
-    t = threading.Thread(target=lambda:udp_listen(udp_socket))
-    t.setDaemon(True)
-    t.start()
+    t0 = threading.Thread(target=lambda:udp_listen(udp_socket))
+    t0.setDaemon(True)
+    t0.start()
     
-    t = threading.Thread(target=udp处理)
-    t.setDaemon(True)
-    t.start()
+    t1 = threading.Thread(target=udp处理)
+    t1.setDaemon(True)
+    t1.start()
     
 print('监听启动了。')
 t = threading.Thread(target=server)
