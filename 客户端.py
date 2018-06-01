@@ -79,7 +79,7 @@ class 主窗口(QWidget):
                 pass
             if event.type() == QEvent.TouchUpdate:
                 self.所有触点=[]
-                self.glWidget.控制=[0,0]
+                self.glWidget.球控制=[0,0]
                 for i,触点 in enumerate(event.touchPoints()):
                     p0=触点.pos()
                     p1=触点.lastPos()
@@ -87,7 +87,7 @@ class 主窗口(QWidget):
                     self.球动(p0.x(),p0.y(),p1.x(),p1.y())
             if event.type() == QEvent.TouchEnd:
                 self.所有触点=None
-                self.glWidget.控制=[0,0]
+                self.glWidget.球控制=[0,0]
                 
         return False
 
@@ -126,7 +126,7 @@ class 主窗口(QWidget):
         p=self.控制球.mapFromParent(QPoint(x1,y1))
         if 0<=p.x()<=d and 0<=p.y()<=d:
             v=(vec(p.x(),p.y())-vec(d/2,d/2)).normalize()
-            self.glWidget.控制=[-v.y,-v.x]
+            self.glWidget.球控制=[-v.y,-v.x]
         if d/3<=p.x()<=d/3*2 and d/3<=p.y()<=d/3*2:
             net_client.udp_send(('跳',0,'开始施法'))
 
@@ -140,13 +140,13 @@ class 主窗口(QWidget):
         if key==16777216:   #ESC
             self.控制断开()
         if key=='W':
-            self.glWidget.控制[0]+=1
+            self.glWidget.键盘控制[0]+=1
         if key=='S':
-            self.glWidget.控制[0]-=1
+            self.glWidget.键盘控制[0]-=1
         if key=='A':
-            self.glWidget.控制[1]+=1
+            self.glWidget.键盘控制[1]+=1
         if key=='D':
-            self.glWidget.控制[1]-=1
+            self.glWidget.键盘控制[1]-=1
         if key==' ':
             net_client.udp_send(('跳',0,'开始施法'))
         if key=='Q':
@@ -163,13 +163,13 @@ class 主窗口(QWidget):
         except:
             None
         if key=='W':
-            self.glWidget.控制[0]-=1
+            self.glWidget.键盘控制[0]-=1
         if key=='S':
-            self.glWidget.控制[0]+=1
+            self.glWidget.键盘控制[0]+=1
         if key=='A':
-            self.glWidget.控制[1]-=1
+            self.glWidget.键盘控制[1]-=1
         if key=='D':
-            self.glWidget.控制[1]+=1
+            self.glWidget.键盘控制[1]+=1
         if key=='Q':
             net_client.udp_send(('法术',3,'停止施法'))
         if key=='E':
@@ -196,11 +196,18 @@ class GLWidget(QOpenGLWidget):
         self.绘图钟=clock.clock()
         self.接管鼠标 = True
         self.世界=env.主世界
-        self.控制=[0,0]
-        self.实际帧率=0
-        self.绘图帧率=0
-        self.逻辑帧率=0
+        self.键盘控制=[0,0]
+        self.球控制=[0,0]
+        self.实际间隔=0
+        self.绘图间隔=0
+        self.逻辑间隔=0
+        self.t=0
         
+    @property
+    def 控制(self):
+        return [self.键盘控制[0]+self.球控制[0], 
+                self.键盘控制[1]+self.球控制[1]]
+
     def initializeGL(self):
         
         glutInit()
@@ -259,13 +266,13 @@ class GLWidget(QOpenGLWidget):
         t2+=1/10**6
         t3+=1/10**6
 
-        self.实际帧率+=1/t1*0.1
-        self.绘图帧率+=1/t2*0.1
-        self.逻辑帧率+=1/t3*0.1
-        self.实际帧率*=10/11
-        self.绘图帧率*=10/11
-        self.逻辑帧率*=10/11
-        self.parent().提示.setText('实际帧率: %d \n绘图帧率: %d \n逻辑帧率: %d\n' % (self.实际帧率, self.绘图帧率, self.逻辑帧率))
+        self.实际间隔+=t1*0.1
+        self.绘图间隔+=t2*0.1
+        self.逻辑间隔+=t3*0.1
+        self.实际间隔*=10/11
+        self.绘图间隔*=10/11
+        self.逻辑间隔*=10/11
+        self.parent().提示.setText('实际帧率: %d \n绘图帧率: %d \n逻辑帧率: %d\n' % (1/self.实际间隔, 1/self.绘图间隔, 1/self.逻辑间隔))
 
         self.update()
 
