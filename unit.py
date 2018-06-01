@@ -34,43 +34,35 @@ class 单位():
     空气阻力系数=0
     形状=vec(1,1,1)
     视高=0
+    模型=None
     腿脚速度=2
     跳跃高度=1 #因为积分不满所以实际上达不到
     在走=False
-    模型=None
     
     def __init__(self):
         self.id=-1
-        self.生命=100
-        self.魔力=100
         self.基础速度=vec(0,0,0)
         
         self.位置=vec(0,0,0)
-        self.面角=[0,0]
         
         self.法术=h_list(self)
         self.效果=h_list(self)
         
     def __getstate__(self):
-        return {0:struct.pack('i10f?',
+        return {0:struct.pack('i6f?',
             self.id,
-            self.生命,self.魔力,
             self.基础速度.x,self.基础速度.y,self.基础速度.z,
             self.位置.x,self.位置.y,self.位置.z,
-            self.面角[0],self.面角[1],
             self.生
             )}
     def __setstate__(self,state):
         (self.id,
-        self.生命,self.魔力,   
         速度x,速度y,速度z,
         位置x,位置y,位置z,
-        面角0,面角1,
-        self.生) = struct.unpack('i10f?',state[0])
+        self.生) = struct.unpack('i6f?',state[0])
     
         self.基础速度=vec(速度x,速度y,速度z)
         self.位置=vec(位置x,位置y,位置z)
-        self.面角=[面角0,面角1]
     
     def tp(self,t):
         self.物理(t)
@@ -324,9 +316,37 @@ class 圣剑(虚无,单位):
             particle.particle(14,x,y,z,speed=0.6,t=rd(0.5,2.5),size=0.3,重力系数=0.1)
             
 class 生物(单位):
+
     def __init__(self):
         super().__init__()
         self.行走方向=0
+        self.生命=100
+        self.魔力=100
+        self.面角=[0,0]
+        
+    def __getstate__(self):
+        return {0:struct.pack('i11f2?',
+            self.id,
+            self.生命,self.魔力,
+            self.基础速度.x,self.基础速度.y,self.基础速度.z,
+            self.位置.x,self.位置.y,self.位置.z,
+            self.面角[0],self.面角[1],
+            self.行走方向,
+            self.生,self.在走
+            )}
+
+    def __setstate__(self,state):
+        (self.id,
+        self.生命,self.魔力,   
+        速度x,速度y,速度z,
+        位置x,位置y,位置z,
+        面角0,面角1,
+        self.行走方向,
+        self.生,self.在走) = struct.unpack('i11f2?',state[0])
+    
+        self.基础速度=vec(速度x,速度y,速度z)
+        self.位置=vec(位置x,位置y,位置z)
+        self.面角=[面角0,面角1]
 
     def 跳(self):
         if self.着地:
@@ -361,8 +381,8 @@ class 人(生物):
         x,y,z=self.眼睛-self.位置
         
         glTranslatef(x,y,0)
-        with points(color=(1,1,1),size=20):
-            glVertex3f(0,0,1)
+        # with points(color=(1,1,1),size=20):
+        #     glVertex3f(0,0,1)
         glRotatef(self.面角[0]/pi*180-90,  0,0,1)
         glTranslatef(-x,-y,0)
         
