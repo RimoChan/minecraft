@@ -31,10 +31,22 @@ pip install pyqt5 pyopengl pillow pyglet pywavefront opencv-python
 ## 玩耍
 
 python3 服务主机.py 來啓動伺服器   
-python3 客户端qt.py 來啓動用戶端  
+python3 客户端.py 來啓動用戶端  
 
 使用 *滑鼠* 來控制方向   
 使用 *WASD* 來行走   
 使用 *空白鍵* 來跳躍   
 使用 *左鍵和右鍵* 來使破壞和放置方塊   
 使用 *QE和Shift* 來使用特殊技能   
+
+# 關於資源佔用
+
+在默認配置下: 
+
+佔用內存大約500M。   
+佔用網速大約在10KB~40KB之間。   
+在廢銅爛鐵版surface3上姑且能有30幀。   
+
+我只試過在低延遲的局域網(Wifi)內玩耍，有一次拿Note4做了一個熱點來玩，結果卡到爆炸……
+
+不過我經常會更新，這個也不是每次都會測所以不及時，參考價值也不大……
