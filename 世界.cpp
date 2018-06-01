@@ -63,6 +63,17 @@ void f(float l){
                l, l, l,
                l, l, l});
 }
+void 写颜色(float a,float b,float c,float d){
+    a=pow(a,0.7);
+    b=pow(b,0.7);
+    c=pow(c,0.7);
+    d=pow(d,0.7);
+    加入缓冲区(颜色缓冲区,
+             {a,a,a,
+              b,b,b,
+              c,c,c,
+              d,d,d});
+}
 class 区块{public:
     uchar a[16][16][16]={0};
     bool 最新=true;
@@ -234,8 +245,20 @@ void 画顶(uchar id,int x,int y,int z){
                1+x, 0+y, 1+z,
                1+x, 1+y, 1+z,
                0+x, 1+y, 1+z});
-    float l=float(主世界.亮度(x,y,z+1)+1)/16;
-    f(l);
+    uchar a00=主世界.亮度(x-1,y-1,z+1);
+    uchar a01=主世界.亮度(x-1,y,z+1);
+    uchar a02=主世界.亮度(x-1,y+1,z+1);
+    uchar a10=主世界.亮度(x,y-1,z+1);
+    uchar a11=主世界.亮度(x,y,z+1);
+    uchar a12=主世界.亮度(x,y+1,z+1);
+    uchar a20=主世界.亮度(x+1,y-1,z+1);
+    uchar a21=主世界.亮度(x+1,y,z+1);
+    uchar a22=主世界.亮度(x+1,y+1,z+1);
+    float a=(a00+a01+a11+a10)/60.0,
+          b=(a10+a11+a20+a21)/60.0,
+          c=(a11+a12+a21+a22)/60.0,
+          d=(a01+a02+a11+a12)/60.0;
+    写颜色(a,b,c,d);
     tex(0,0, 0,id);
     tex(0,1, 0,id);
     tex(1,1, 0,id);
@@ -260,8 +283,20 @@ void 画前(uchar id,int x,int y,int z){
                0+x, 1+y, 1+z,
                1+x, 1+y, 1+z,
                1+x, 1+y, 0+z});
-    float l=float(主世界.亮度(x,y+1,z)+1)/16;
-    f(l);
+    uchar a00=主世界.亮度(x-1,y+1,z-1);
+    uchar a01=主世界.亮度(x-1,y+1,z+0);
+    uchar a02=主世界.亮度(x-1,y+1,z+1);
+    uchar a10=主世界.亮度(x+0,y+1,z-1);
+    uchar a11=主世界.亮度(x+0,y+1,z+0);
+    uchar a12=主世界.亮度(x+0,y+1,z+1);
+    uchar a20=主世界.亮度(x+1,y+1,z-1);
+    uchar a21=主世界.亮度(x+1,y+1,z+0);
+    uchar a22=主世界.亮度(x+1,y+1,z+1);
+    float a=(a00+a01+a11+a10)/60.0,
+          b=(a10+a11+a20+a21)/60.0,
+          c=(a11+a12+a21+a22)/60.0,
+          d=(a01+a02+a11+a12)/60.0;
+    写颜色(a,d,c,b);
     tex(1,1, 1,id);
     tex(1,0, 1,id);
     tex(0,0, 1,id);
@@ -273,8 +308,20 @@ void 画后(uchar id,int x,int y,int z){
                1+x, 0+y, 0+z,
                1+x, 0+y, 1+z,
                0+x, 0+y, 1+z});
-    float l=float(主世界.亮度(x,y-1,z)+1)/16;
-    f(l);
+    uchar a00=主世界.亮度(x-1,y-1,z-1);
+    uchar a01=主世界.亮度(x-1,y-1,z+0);
+    uchar a02=主世界.亮度(x-1,y-1,z+1);
+    uchar a10=主世界.亮度(x+0,y-1,z-1);
+    uchar a11=主世界.亮度(x+0,y-1,z+0);
+    uchar a12=主世界.亮度(x+0,y-1,z+1);
+    uchar a20=主世界.亮度(x+1,y-1,z-1);
+    uchar a21=主世界.亮度(x+1,y-1,z+0);
+    uchar a22=主世界.亮度(x+1,y-1,z+1);
+    float a=(a00+a01+a11+a10)/60.0,
+          b=(a10+a11+a20+a21)/60.0,
+          c=(a11+a12+a21+a22)/60.0,
+          d=(a01+a02+a11+a12)/60.0;
+    写颜色(a,b,c,d);
     tex(0,1, 2,id);
     tex(1,1, 2,id);
     tex(1,0, 2,id);
@@ -286,8 +333,20 @@ void 画左(uchar id,int x,int y,int z){
                1+x, 1+y, 0+z,
                1+x, 1+y, 1+z,
                1+x, 0+y, 1+z});
-    float l=float(主世界.亮度(x+1,y,z)+1)/16;
-    f(l);
+    uchar a00=主世界.亮度(x+1,y-1,z-1);
+    uchar a01=主世界.亮度(x+1,y-1,z+0);
+    uchar a02=主世界.亮度(x+1,y-1,z+1);
+    uchar a10=主世界.亮度(x+1,y+0,z-1);
+    uchar a11=主世界.亮度(x+1,y+0,z+0);
+    uchar a12=主世界.亮度(x+1,y+0,z+1);
+    uchar a20=主世界.亮度(x+1,y+1,z-1);
+    uchar a21=主世界.亮度(x+1,y+1,z+0);
+    uchar a22=主世界.亮度(x+1,y+1,z+1);
+    float a=(a00+a01+a11+a10)/60.0,
+          b=(a10+a11+a20+a21)/60.0,
+          c=(a11+a12+a21+a22)/60.0,
+          d=(a01+a02+a11+a12)/60.0;
+    写颜色(a,b,c,d);
     tex(0,1, 3,id);
     tex(1,1, 3,id);
     tex(1,0, 3,id);
@@ -299,8 +358,20 @@ void 画右(uchar id,int x,int y,int z){
                0+x, 0+y, 1+z,
                0+x, 1+y, 1+z,
                0+x, 1+y, 0+z});
-    float l=float(主世界.亮度(x-1,y,z)+1)/16;
-    f(l);
+    uchar a00=主世界.亮度(x-1,y-1,z-1);
+    uchar a01=主世界.亮度(x-1,y-1,z+0);
+    uchar a02=主世界.亮度(x-1,y-1,z+1);
+    uchar a10=主世界.亮度(x-1,y+0,z-1);
+    uchar a11=主世界.亮度(x-1,y+0,z+0);
+    uchar a12=主世界.亮度(x-1,y+0,z+1);
+    uchar a20=主世界.亮度(x-1,y+1,z-1);
+    uchar a21=主世界.亮度(x-1,y+1,z+0);
+    uchar a22=主世界.亮度(x-1,y+1,z+1);
+    float a=(a00+a01+a11+a10)/60.0,
+          b=(a10+a11+a20+a21)/60.0,
+          c=(a11+a12+a21+a22)/60.0,
+          d=(a01+a02+a11+a12)/60.0;
+    写颜色(a,d,c,b);
     tex(1,1, 4,id);
     tex(1,0, 4,id);
     tex(0,0, 4,id);
