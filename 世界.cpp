@@ -2,6 +2,7 @@
 #define 导出 extern "C" __declspec(dllexport)
 #include <map>
 #include <iostream>
+#include <algorithm>
 using namespace std;
 
 typedef tuple<int,int,int> t3;
@@ -30,18 +31,6 @@ int between(int x,int a,int b){
     return x>a and x<b;
 }
 
-int max(int a,int b,int c,int d,int e,int f,int g){
-    int t=-9999999;
-    if(a>t)t=a;
-    if(b>t)t=b;
-    if(c>t)t=c;
-    if(d>t)t=d;
-    if(e>t)t=e;
-    if(f>t)t=f;
-    if(g>t)t=g;
-    return t;
-}
-
 class 缓冲{public:
     float*内容=NULL; 
     int 长度=0;
@@ -51,8 +40,8 @@ class 缓冲{public:
 缓冲 颜色缓冲区;
 
 void 加入缓冲区(缓冲&缓冲区,initializer_list<float> lst){
-    for(auto i=lst.begin();i!=lst.end();i++){
-        缓冲区.内容[缓冲区.长度]=*i;
+    for(auto i:lst){
+        缓冲区.内容[缓冲区.长度]=i;
         缓冲区.长度++;
     }
 }
@@ -75,7 +64,7 @@ void 写颜色(float a,float b,float c,float d){
               d,d,d});
 }
 class 区块{public:
-    uchar a[16][16][16]={0};
+    uchar a[16][16][16]={{{0}}};
     bool 最新=true;
     区块(int 默认值=0){
         for(uchar x=0;x<16;x++)
@@ -169,15 +158,15 @@ class 世界{public:
         if(顶(x,y)<z)
             t=15;
         else
-            t=max(
-                1,
+            t=max({
+                uchar(1),
                 亮度(x,y,z+1),
                 亮度(x,y,z-1),
                 亮度(x,y+1,z),
                 亮度(x,y-1,z),
                 亮度(x+1,y,z),
                 亮度(x-1,y,z)
-            )-1;
+            })-1;
         int 原亮度=亮度(x,y,z); 
         if(原亮度!=t){
             亮度(x,y,z)=t;
@@ -209,10 +198,9 @@ class 世界{public:
         颜色缓冲区.长度=0;
         纹理缓冲区.内容=纹理;
         纹理缓冲区.长度=0;
-        int ox=get<0>(key)*16,
-            oy=get<1>(key)*16,
-            oz=get<2>(key)*16,
-            x,y,z,id;
+        auto [ox,oy,oz] = key;
+        ox*=16; oy*=16; oz*=16;
+        int x,y,z,id;
         for(int dx=0;dx<16;dx++)
             for(int dy=0;dy<16;dy++)
                 for(int dz=0;dz<16;dz++){
