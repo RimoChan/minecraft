@@ -25,17 +25,20 @@ try:
     运行时间=0
     while True:
         time_passed = clock.tick()
-        if time_passed<0.01:   #限制性能
+        if time_passed<0.01:    #限制性能
             clock.back()
             time.sleep(0.01)
             time_passed=clock.tick()
         if time_passed>0.02:
-            time_passed=0.02 #保证刷新均匀
+            time_passed=0.02    #保证刷新均匀
         运行时间+=time_passed
         env.主世界.tp(time_passed)
         env.发送单位=env.主世界.单位池
+        env.发送物品=env.主世界.物品池
 except Exception as e:
     env.主世界.保存()
+    print('保存了。')
+    raise e
 
 
         

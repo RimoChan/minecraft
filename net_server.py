@@ -40,8 +40,17 @@ def udp处理():
         t=udp钟.tick()
         for addr in mir:
             u=mir[addr]
-            udp_socket2.serv_all_send({'id':u['id'],'单位':env.发送单位},
+            try:
+                udp_socket2.serv_all_send({
+                        'id':u['id'],
+                        '单位':env.发送单位,
+                        '物品':env.发送物品,
+                        '物品栏':env.发送单位[u['id']].物品栏.折(),
+                    },
                     addr)
+            except Exception as e:
+                print(e)
+
             u['time']-=t
             if u['time']<0:
                 try:
@@ -78,12 +87,10 @@ def server():
                 try:
                     我=env.主世界.单位池[udp池[addr]['id']]
                     # print(data)
-                    if data[0]=='法术':
-                        if data[2]=='开始施法':
-                            我.法术[data[1]].call()
-                        if data[2]=='停止施法':
-                            我.法术[data[1]].stop()
-                            
+                    if data[0]=='左键' or data[0]=='右键':
+                        我.使用装备(data[0]+data[1])
+                    if data[0]=='选择物品':
+                        我.物品栏.选择=data[1]
                     if data[0]=='走':
                         我.在走=data[1]
                         我.行走方向=data[2]
@@ -102,13 +109,14 @@ def server():
                                 i+=1
                             udp_socket2.serv_all_send({'块':q},
                             addr)
-                            print('收到:',data[1],'发至:',i)
+                            # print('收到:',data[1],'发至:',i)
                 except Exception as e:
+                    raise(e)
                     print(e)
             elif isinstance(data,str):
                 pass
             else:
-                print(data)
+                print('无法理解的:',data)
                 
     t0 = threading.Thread(target=lambda:udp_listen(udp_socket))
     t0.setDaemon(True)

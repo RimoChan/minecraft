@@ -6,80 +6,7 @@ m=dict()
 class 块():
     id=1
     坚固=10
-    @classmethod
-    def init(cls):
-        起始位置=(cls.id-2)*16
-        cls.顶,cls.前,cls.后,cls.左,cls.右,cls.底=[(i*16,起始位置) for i in range(6)]
-            
-    @classmethod
-    def Tex(cls,x,y,面):
-        x=面[0]+x*16
-        y=面[1]+y*16
-        y=512-y
-        return x/128,y/512
 
-    @classmethod
-    def 画顶(cls):
-        return (cls.Tex(0,0,cls.顶)+cls.Tex(0,1,cls.顶)+cls.Tex(1,1,cls.顶)+cls.Tex(1,0,cls.顶)
-                ,
-                (0, 0, 1,
-                 1, 0, 1,
-                 1, 1, 1,
-                 0, 1, 1))
-        
-    @classmethod
-    def 画底(cls):
-        return (cls.Tex(1,0,cls.底)+cls.Tex(1,1,cls.底)+cls.Tex(0,1,cls.底)+cls.Tex(0,0,cls.底)
-                ,
-                (0, 0, 0,
-                 0, 1, 0,
-                 1, 1, 0,
-                 1, 0, 0))
-        
-        
-    @classmethod
-    def 画前(cls):
-        return (cls.Tex(1, 1, cls.前)+cls.Tex(1, 0, cls.前)+cls.Tex(0, 0, cls.前)+cls.Tex(0, 1, cls.前)
-            ,
-            (0, 1, 0,
-             0, 1, 1,
-             1, 1, 1,
-             1, 1, 0))
-        
-    @classmethod
-    def 画后(cls):
-        return (
-            cls.Tex(0, 1, cls.后)+cls.Tex(1, 1, cls.后)+cls.Tex(1, 0, cls.后)+cls.Tex(0, 0, cls.后)  
-            ,
-            (0, 0, 0,
-             1, 0, 0,
-             1, 0, 1,
-             0, 0, 1)
-            )
-        
-        
-    @classmethod
-    def 画左(cls):
-        return (
-            cls.Tex(0, 1, cls.左)+cls.Tex(1, 1, cls.左)+cls.Tex(1, 0, cls.左)  +cls.Tex(0, 0, cls.左)
-            ,
-            (1, 0, 0,
-             1, 1, 0,
-             1, 1, 1, 
-             1, 0, 1)
-            )
-        
-    @classmethod
-    def 画右(cls):
-        return (
-            cls.Tex(1, 1, cls.右)+cls.Tex(1, 0, cls.右)+cls.Tex(0, 0, cls.右)+cls.Tex(0, 1, cls.右)
-            ,
-            (0, 0, 0,
-             0, 0, 1,
-             0, 1, 1,
-             0, 1, 0)
-            )
-    
 class 沙(块):
     id=2
     
@@ -128,6 +55,15 @@ class 沙砾(块):
 class 金块(块):
     id=17
 
+import 物品
+掉落表={}
+掉落表[草]=物品.土
+掉落表[叶]=None
+def 掉落(id):
+    块=m[id]
+    if 块 in 掉落表:
+        return 掉落表[块]
+    return 物品.__dict__[块.__name__]
+
 for i in 块,沙,土,草,砖,橡木板,TNT,钻石,石,树干,叶,石台阶,石砖,雪块,红石,沙砾:
     m[i.id]=i
-    i.init()

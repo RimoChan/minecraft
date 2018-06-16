@@ -36,7 +36,7 @@ import block
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-
+from 客户端物品栏 import 物品栏
 from 配置 import 配置
 
 天色=0.4,0.6,1,1
@@ -49,12 +49,15 @@ class 主窗口(QWidget):
         self.resize(*配置.屏幕大小)
         self.setWindowTitle("卖淫先锋")
         self.glWidget = GLWidget(self)
+        self.物品栏=物品栏()
+        self.物品栏.hide()
         self.提示=QLabel(self)
         self.提示.resize(200,80)
         self.无控制遮罩=QLabel(self)
         self.无控制遮罩.resize(*配置.屏幕大小)
         self.无控制遮罩.setStyleSheet("background-color:rgba(0,0,0,0.5);")
         self.控制接上()
+        env.主窗口=self
         
         if 配置.surface模式:
             self.p0=None
@@ -100,18 +103,18 @@ class 主窗口(QWidget):
             return
 
         if event.button() == Qt.LeftButton: 
-            net_client.udp_send(('法术',0,'开始施法'))
+            net_client.udp_send(('左键','开始施法'))
         if event.button() == Qt.RightButton: 
-            net_client.udp_send(('法术',1,'开始施法'))
+            net_client.udp_send(('右键','开始施法'))
 
     def mouseReleaseEvent(self,event):
         if 配置.surface模式:
             return
 
         if event.button() == Qt.LeftButton: 
-            net_client.udp_send(('法术',0,'停止施法'))
+            net_client.udp_send(('左键','停止施法'))
         if event.button() == Qt.RightButton: 
-            net_client.udp_send(('法术',1,'停止施法'))
+            net_client.udp_send(('右键','停止施法'))
         if 配置.surface模式:
             self.p0 = None
 
@@ -137,8 +140,10 @@ class 主窗口(QWidget):
         except:
             None
 
-        if key==16777216:   #ESC
+        if key==16777216 and self.glWidget.接管鼠标:   #ESC
             self.控制断开()
+        else:
+            self.控制接上()
         if key=='W':
             self.glWidget.键盘控制[0]+=1
         if key=='S':
@@ -149,12 +154,11 @@ class 主窗口(QWidget):
             self.glWidget.键盘控制[1]-=1
         if key==' ':
             net_client.udp_send(('跳',0,'开始施法'))
-        if key=='Q':
-            net_client.udp_send(('法术',3,'开始施法'))
         if key=='E':
-            net_client.udp_send(('法术',4,'开始施法'))
-        if key==16777248:   #SHIFT
-            net_client.udp_send(('法术',5,'开始施法'))
+            self.控制断开()
+            self.物品栏.show()
+        # if key==16777248:   #SHIFT
+        #     net_client.udp_send(('法术',5,'开始施法'))
 
     def keyReleaseEvent(self, event):
         key=QKeyEvent(event).key()
@@ -170,12 +174,12 @@ class 主窗口(QWidget):
             self.glWidget.键盘控制[1]-=1
         if key=='D':
             self.glWidget.键盘控制[1]+=1
-        if key=='Q':
-            net_client.udp_send(('法术',3,'停止施法'))
-        if key=='E':
-            net_client.udp_send(('法术',4,'停止施法'))
-        if key==16777248:   #SHIFT
-            net_client.udp_send(('法术',5,'停止施法'))
+        # if key=='Q':
+        #     net_client.udp_send(('法术',3,'停止施法'))
+        # if key=='E':
+        #     net_client.udp_send(('法术',4,'停止施法'))
+        # if key==16777248:   #SHIFT
+        #     net_client.udp_send(('法术',5,'停止施法'))
 
     def 控制断开(self):
         self.setCursor(QCursor())
@@ -183,6 +187,7 @@ class 主窗口(QWidget):
         self.无控制遮罩.show()
 
     def 控制接上(self):
+        self.物品栏.hide()
         self.setCursor(Qt.BlankCursor)
         self.glWidget.接管鼠标=True
         self.无控制遮罩.hide()
@@ -190,6 +195,7 @@ class 主窗口(QWidget):
 class GLWidget(QOpenGLWidget):
     def __init__(self, parent=None):
         super(GLWidget, self).__init__(parent)
+
         self.resize(*配置.屏幕大小)
         self.世界钟=clock.clock()
         self.周期钟=clock.clock()
@@ -211,12 +217,13 @@ class GLWidget(QOpenGLWidget):
     def initializeGL(self):
         
         glutInit()
+        glEnable(GL_ALPHA_TEST)
+        glAlphaFunc(GL_GREATER, 0.5)
         glClearColor(0,0,0,0)
         glClearDepth(1.0)
         glEnable(GL_CULL_FACE)
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_TEXTURE_2D)
-        glPolygonMode(GL_FRONT, GL_FILL)
 
         glFogi(GL_FOG_MODE, GL_LINEAR)
         glFogfv(GL_FOG_COLOR, (GLfloat * 4)(1,1,1,1))
@@ -233,6 +240,8 @@ class GLWidget(QOpenGLWidget):
         glGenBuffers(10000)
 
     def paintGL(self):
+        # 先放着
+        self.parent().物品栏.刷新(env.物品信息)
 
         if self.接管鼠标 and not 配置.surface模式:
             self.镜头修正()
@@ -334,9 +343,9 @@ class GLWidget(QOpenGLWidget):
             数据['颜色组'].ctypes.data, 
             数据['纹理组'].ctypes.data)
         纹理数据数=顶点数据数//3*2
-        数据['顶点组']=数据['顶点组'][:顶点数据数]
-        数据['颜色组']=数据['颜色组'][:顶点数据数]
-        数据['纹理组']=数据['纹理组'][:纹理数据数]
+        数据['顶点组']=数据['顶点组'][:顶点数据数].copy()
+        数据['颜色组']=数据['颜色组'][:顶点数据数].copy()
+        数据['纹理组']=数据['纹理组'][:纹理数据数].copy()
         顶点数=顶点数据数//3
 
 
@@ -402,26 +411,32 @@ class GLWidget(QOpenGLWidget):
         glBindBuffer(GL_ARRAY_BUFFER, 0);
             
         # 画粒子效果
-        glDisable(GL_CULL_FACE)
+        glBindTexture(GL_TEXTURE_2D, 0)
+        glColor3f(1,1,1)
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
         for i in particle.particle_pool:
-            i.draw()
+            i.draw(self.我.面向)
         glPolygonMode(GL_FRONT, GL_FILL)
-        glEnable(GL_CULL_FACE)
-
 
         # 画单位
         glColor(1,1,1)
-        t=copy.copy(self.世界.单位池)
-        for i in t:
-            i=t[i]
-            if i.id==self.我.id:
+        for i,u in copy.copy(self.世界.单位池).items():
+            if u.id==self.我.id:
                 continue
-            with temp_translate(*i.位置):
-                i.draw()
+            with temp_translate(*u.位置):
+                u.draw()
 
-        t=self.我.所面向的块      
-        # print(t)
+        # 画掉落物
+        t=time.clock()
+        glBindTexture(GL_TEXTURE_2D, env.m['全纹理'])
+        for i,u in copy.copy(self.世界.物品池).items():
+            x,y,z=u[0]
+            with temp_translate(x,y,z+(sin(i+3*t)+1)/10):
+                with temp_rotate(42*(i+t),'z'):
+                    with temp_translate(-0.1,-0.1,0):
+                        u[1].绘制()
+
+        t=self.我.所面向的块 
         if t:
             x,y,z=t
             glColor4f(1,1,1,0.7)

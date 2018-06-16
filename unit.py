@@ -17,6 +17,9 @@ import 情形
 import time
 import 自动
 
+import 物品栏
+import 物品
+
 from pythongl import *
 
 from tool import *
@@ -44,8 +47,7 @@ class 单位():
         self.基础速度=vec(0,0,0)
         
         self.位置=vec(0,0,0)
-        
-        self.法术=h_list(self)
+    
         self.效果=h_list(self)
         
     def __getstate__(self):
@@ -65,12 +67,12 @@ class 单位():
         self.位置=vec(位置x,位置y,位置z)
     
     def tp(self,t):
+
         self.物理(t)
         
-        for i in self.法术:
-            i.tp(t)
         for i in self.效果:
             i.tp(t)
+
         de(self.效果, lambda i: not i.生)
         #233333
         if self.位置.z<-100:
@@ -162,9 +164,8 @@ class 单位():
         if self.模型:
             v=tuple(self.面向)
             with temp_translate(*tuple(self.形状*0.5)):
-                旋转(np.array([0,1.,0]),np.array(v))
-                self.模型.draw()
-                旋转(np.array(v),np.array([0,1.,0]))
+                with temp_vec_rotate(np.array([0,1.,0]),np.array(v)):
+                    self.模型.draw()
             return
 
         x,y,z=self.形状
@@ -279,7 +280,7 @@ class 反射箭弱(反射箭):
     def __init__(self):
         super().__init__()
         self.效果.append(effect.限时生命(6))
-        self.反射次数=3
+        self.反射次数=4
         
 class 反射箭强(反射箭):
     def __init__(self):
@@ -366,15 +367,15 @@ class 人(生物):
     照片='48035702'
     def __init__(self):
         super().__init__()
-        self.法术.append(magic.去块())
+        self.物品栏=物品栏.物品栏(self)
 
-        self.法术.append(magic.放块())
-        
-        self.法术.append(magic.丢球())  #滚轮
-        
-        self.法术.append(magic.弹幕())  #Q
-        self.法术.append(magic.召唤羊())   #E
-        self.法术.append(magic.狂热())   #SHIFT
+    @property
+    def 装备(self):
+        return self.物品栏.在用的
+
+    # 我TM在逗你
+    def 使用装备(self,s):
+        exec('self.装备.%s()'%s)
 
     def draw(self):
         super().draw()
@@ -412,9 +413,22 @@ class 人(生物):
 
     def tp(self,t):
         super().tp(t)
+        if not env.客户端:
+            self.物品栏.tp(t)
         预加载距离=20
         t=tuple(self.位置+ran_vec()*预加载距离*random.random())
         env.主世界.预生成地形((int(t[0]),int(t[1])))
+
+        try:
+            if not env.客户端:
+                self.物品栏.清理()
+                for i,u in copy.copy(env.主世界.物品池).items():
+                    x,y,z=u[0]
+                    if (vec(x,y,z)-self.中心).mo<1.5:
+                        self.物品栏.加(u[1])
+                        del env.主世界.物品池[i]
+        except Exception as e:
+            print(e)
         
 class suin(人):
     照片='48035702'

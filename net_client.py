@@ -45,6 +45,10 @@ def recv():
                 env.my_id=value
             if key=='单位':
                 env.主世界.单位池=value
+            if key=='物品':
+                env.主世界.物品池=value
+            if key=='物品栏': 
+                env.物品信息=value
             if key=='块':
                 t='块'
                 # print('数据起始:',value[0][0])
