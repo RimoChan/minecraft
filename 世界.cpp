@@ -139,14 +139,16 @@ class 世界{public:
             更新周边亮度(x,y,z);
         绘图重置(x,y,z);
     }
-    void 去块(int x,int y,int z){
+    uchar 去块(int x,int y,int z){
         if(not 存在(x,y,z))
-            return;
+            return 0;
+        uchar t=块(x,y,z);
         块(x,y,z)=0;
         if(顶(x,y)==z)
             更新顶(x,y);
         更新亮度(x,y,z);
         绘图重置(x,y,z);
+        return t;
     }
     void 更新亮度(int x,int y,int z){
         if(存在(x,y,z)) 
@@ -369,8 +371,8 @@ void 画右(uchar id,int x,int y,int z){
 导出 void set_block(int x,int y,int z,int 块号){
     主世界.放块(x,y,z,块号);
 }
-导出 void remove_block(int x,int y,int z,int 块号){
-    主世界.去块(x,y,z);
+导出 uchar remove_block(int x,int y,int z){
+    return 主世界.去块(x,y,z);
 }
 导出 bool have(int x,int y,int z){
     return 主世界.存在(x,y,z);
