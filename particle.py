@@ -31,9 +31,10 @@ particle_pool=[]
 class particle():
     就绪=False
     def __init__(self,方块id,x,y,z,speed,t,size,重力系数=0):
+        if not env.启用粒子:
+            return
         self.方块id=方块id
         块=block.m[方块id]
-        self.纹理 = 块.画底()[0]
         self.x=x
         self.y=y
         self.z=z
@@ -49,16 +50,7 @@ class particle():
         self.max_time=t
         self.重力系数=重力系数
 
-        if env.启用粒子:
-            particle_pool.append(self)
-        
-        self.a=ran_vec()*self.size
-        self.c=ran_vec()*self.size
-        self.b=self.a+self.c
-
-        self.a=tuple(self.a)
-        self.b=tuple(self.b)
-        self.c=tuple(self.c)
+        particle_pool.append(self)
 
         self.就绪=True
 
@@ -72,21 +64,14 @@ class particle():
         self.y+=self.speed[1]*t
         self.z+=self.speed[2]*t
 
-    def draw(self):
+    def draw(self,视线方向):
         if not self.就绪:
             return
-        glTranslatef(self.x,self.y,self.z)
-        glPointSize(self.size)
-
-        glBegin(GL_QUADS)
-        glTexCoord2f(self.纹理[0],self.纹理[1])
-        glVertex3f(0,0,0)
-        glTexCoord2f(self.纹理[2],self.纹理[3])
-        glVertex3f(*self.a)
-        glTexCoord2f(self.纹理[4],self.纹理[5])
-        glVertex3f(*self.b)
-        glTexCoord2f(self.纹理[6],self.纹理[7])
-        glVertex3f(*self.c)
-        glEnd()
-
-        glTranslatef(-self.x,-self.y,-self.z)
+        d=self.size
+        with temp_translate(self.x,self.y,self.z):
+            with temp_vec_rotate(np.array([0,-1.,0]),np.array(tuple(视线方向))):
+                with quads():
+                    glVertex3f(0,0,d)
+                    glVertex3f(d,0,d)
+                    glVertex3f(d,0,0)
+                    glVertex3f(0,0,0)
