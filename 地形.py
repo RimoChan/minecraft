@@ -51,13 +51,13 @@ class 地形生成器:
 
 
     def 放树(self,世界,x,y,z):
+        for i in range(1,5):
+            世界.放块(x,y,z+i,block.树干,初=True)
         for dx in range(-3,4):
             for dy in range(-3,4):
                 for dz in range(4,8):
                     if dx**2+dy**2+(dz-4)**2<14:
                         世界.放块(x+dx,y+dy,z+dz,block.叶,初=True)
-        for i in range(1,5):
-            世界.放块(x,y,z+i,block.树干,初=True)
 
     def 生成地形(self,世界,块x,块y):
         if self.锁:
