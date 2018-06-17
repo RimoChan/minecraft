@@ -7,6 +7,7 @@ import threading
 import os
 import ctypes
 import time
+import platform 
 
 from vec import *
 import env
@@ -15,7 +16,10 @@ import 块缓冲
 if env.客户端:
     import particle
 
-c世界 = ctypes.WinDLL('世界.dll')
+if platform.architecture()[0][:2]=='64':
+    c世界 = ctypes.WinDLL('世界.dll')
+else:
+    c世界 = ctypes.WinDLL('世界32.dll')
 c世界.export_vertex.argtypes = [ctypes.c_int,ctypes.c_int,ctypes.c_int,ctypes.c_void_p,ctypes.c_void_p,ctypes.c_void_p]
 c世界.have.restype = ctypes.c_bool
 c世界.remove_block.restype = ctypes.c_ubyte
