@@ -1,6 +1,7 @@
 //snow_dll
 #define 导出 extern "C" __declspec(dllexport)
 #include <map>
+#include <unordered_map>
 #include <iostream>
 #include <algorithm>
 using namespace std;
@@ -8,6 +9,17 @@ using namespace std;
 typedef tuple<int,int,int> t3;
 typedef tuple<int,int> t2;
 typedef unsigned char uchar;
+
+struct key_hash3{
+ size_t operator()(const t3& k) const{
+   return std::get<0>(k)*654321+std::get<1>(k)*1237+std::get<2>(k);
+    }
+};
+struct key_hash2{
+ size_t operator()(const t2& k) const{
+   return std::get<0>(k)*1113+std::get<1>(k);
+    }
+};
 
 void 画顶(uchar id,int x,int y,int z); 
 void 画底(uchar id,int x,int y,int z); 
@@ -74,9 +86,12 @@ class 区块{public:
     }
 };
 class 世界{public:
-    map<t3,区块> 块索引;
-    map<t3,区块> 亮度索引;
-    map<t2,int> 顶记录;
+    unordered_map<const t3,区块,key_hash3> 块索引;
+    unordered_map<const t3,区块,key_hash3> 亮度索引;
+    unordered_map<const t2,int,key_hash2> 顶记录;
+    // map<t3,区块> 块索引;
+    // map<t3,区块> 亮度索引;
+    // map<t2,int> 顶记录;
     int 下界=-16;
     世界(){
     }

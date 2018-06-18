@@ -147,12 +147,10 @@ class 单位池(dict):
         
 def test():
     a=世界()
-    a.去块(-1,-1,-10)
     print((-1,-1) in a)
-    a.去块(-1,-1,-10)
-    # print((0,0) in a)
-    # print((-1,0) in a)
-    # print((0,-1) in a)
+    print((0,0) in a)
+    print((-1,0) in a)
+    print((0,-1) in a)
 
 if __name__=='__main__': 
     import cProfile
