@@ -165,7 +165,7 @@ class 单位():
             v=tuple(self.面向)
             with temp_translate(*tuple(self.形状*0.5)):
                 with temp_vec_rotate(np.array([0,1.,0]),np.array(v)):
-                    self.模型.draw()
+                    pywavefront.visualization.draw(self.模型)
             return
 
         x,y,z=self.形状
