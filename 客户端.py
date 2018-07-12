@@ -389,14 +389,31 @@ class GLWidget(QOpenGLWidget):
         # 画天空盒子
         x,y,z=self.我.眼睛
 
-        with temp_translate(x,y,z):
-            with temp_scale(1,1,0.3):
-                glBindTexture(GL_TEXTURE_2D, 0)
-                glDisable(GL_CULL_FACE)
-                glColor(*天色)
-                glutSolidSphere((配置.视距+1)*16,60,60)
-                glEnable(GL_CULL_FACE)
+        glBindTexture(GL_TEXTURE_2D, 0)
+        glDisable(GL_CULL_FACE)
 
+        距离 = (配置.视距+0.5)*16
+        # glColor(1,0,0)
+        # glutSolidSphere(距离,60,60)
+        # glColor(0,0,0)
+        # glutWireSphere(距离,60,60)
+        with temp_translate(x,y,z):
+            with temp_scale(1,1,0.4):
+                glColor(*天色)
+                侧向 = np.cross(np.array(tuple(self.我.面向)),np.array([0,0,1.0]))
+                with temp_vec_rotate(np.array([0,0,1.0]),侧向):
+                    for i in range(0,50):
+                        x1,y1=距离*math.sin(i/50*2*3.15),距离*math.cos(i/50*2*3.15)
+                        x2,y2=距离*math.sin((i+1)/50*2*3.15),距离*math.cos((i+1)/50*2*3.15)
+                        with quads():
+                            glVertex3f(x1, y1, +距离*2)
+                            glVertex3f(x2, y2, +距离*2)
+                            glVertex3f(x2, y2, -距离*2)
+                            glVertex3f(x1, y1, -距离*2)
+        glClear(GL_DEPTH_BUFFER_BIT) 
+        glEnable(GL_CULL_FACE)
+
+        # return
         # 画地形
         glEnableClientState(GL_VERTEX_ARRAY)
         glEnableClientState(GL_TEXTURE_COORD_ARRAY)
