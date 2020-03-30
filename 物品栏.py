@@ -10,6 +10,9 @@ class 物品栏:
         self.默认物品 = 物品.手()
         self.默认物品.owner = owner
         self.之前物品 = self.默认物品
+        
+        for _ in range(1000):
+            self.加(物品.橡木板())
 
     @property
     def 当前物品(self):
