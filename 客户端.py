@@ -213,8 +213,6 @@ class GLWidget(QOpenGLWidget):
                 self.键盘控制[1] + self.球控制[1]]
 
     def initializeGL(self):
-
-        glutInit()
         glEnable(GL_ALPHA_TEST)
         glAlphaFunc(GL_GREATER, 0.01)
         glClearColor(0, 0, 0, 0)
@@ -491,6 +489,7 @@ def 开始玩():
     else:
         window.show()
     sys.exit(app.exec_())
+
 
 if __name__ == '__main__':
     开始玩()
